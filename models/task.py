@@ -50,7 +50,16 @@ class Task(db.Model):
         Returns:
             dict: Diccionario con los datos de la tarea
         """
-        pass # TODO: implementar el método
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'completed': self.completed,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+      
     
     def is_overdue(self):
         """
@@ -59,15 +68,21 @@ class Task(db.Model):
         Returns:
             bool: True si la tarea está vencida, False en caso contrario
         """
-        pass # TODO: implementar el método
+        return self.due_date is not None and self.due_date < datetime.utcnow() and not self.completed
+        
     
     def mark_completed(self):
         """Marca la tarea como completada"""
-        pass # TODO: implementar el método
+        self.completed = True
+        self.updated_at = datetime.utcnow()
+        
     
     def mark_pending(self):
         """Marca la tarea como pendiente"""
-        pass # TODO: implementar el método
+     
+        self.completed = False
+        self.updated_at = datetime.utcnow()
+       
     
     @staticmethod
     def get_all_tasks():
@@ -87,7 +102,8 @@ class Task(db.Model):
         Returns:
             list: Lista de tareas pendientes
         """
-        pass # TODO: implementar el método
+        return Task.query.filter_by(completed=False).order_by(Task.due_date.asc()).all()
+
     
     @staticmethod
     def get_completed_tasks():
@@ -97,8 +113,9 @@ class Task(db.Model):
         Returns:
             list: Lista de tareas completadas
         """
-        pass # TODO: implementar el método
-    
+        return Task.query.filter_by(completed=True).order_by(Task.updated_at.desc()).all()
+
+       
     @staticmethod
     def get_overdue_tasks():
         """
@@ -107,13 +124,21 @@ class Task(db.Model):
         Returns:
             list: Lista de tareas vencidas
         """
-        pass # TODO: implementar el método
+        return Task.query.filter(
+            Task.due_date < datetime.utcnow(),
+            Task.completed == False
+        ).order_by(Task.due_date.asc()).all()
+
+       
     
     def save(self):
         """Guarda la tarea en la base de datos"""
-        pass # TODO: implementar el método
+        db.session.add(self)
+        db.session.commit()
+
     
     def delete(self):
         """Elimina la tarea de la base de datos"""
-        pass # TODO: implementar el método
-
+        db.session.delete(self)
+        db.session.commit()
+       
