@@ -1,5 +1,7 @@
 # taller #2 de Arquitectura de Software: MVC
-
+- NOMBRE : Diego fernando Benitez Camacho 
+- FACULTAD : Ingenieria De Sistemas 
+- SEMESTRE : 7
 ## Descripción
 
 Este proyecto proporciona una plantilla para la implementación de una aplicación web siguiendo el patrón **Modelo** - **Vista** - **Controlador** (**MVC**)
