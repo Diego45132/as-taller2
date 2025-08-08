@@ -42,7 +42,28 @@ def register_routes(app):
         Returns:
             str: HTML renderizado con la lista de tareas
         """
-        pass # TODO: implementar el método
+     
+        filter_type = request.args.get('filter', 'all')
+        sort_type = request.args.get('sort', 'created')
+
+        query = Task.query
+
+        if filter_type == 'pending':
+            query = query.filter_by(completed=False)
+        elif filter_type == 'completed':
+            query = query.filter_by(completed=True)
+
+       
+        if sort_type == 'date':
+            query = query.order_by(Task.due_date.asc())
+        elif sort_type == 'title':
+            query = query.order_by(Task.title.asc())
+        else: 
+            query = query.order_by(Task.created_at.desc())
+
+        tasks = query.all()
+        return render_template('task_list.html', tasks=tasks)
+
     
     
     @app.route('/tasks/new', methods=['GET', 'POST'])
