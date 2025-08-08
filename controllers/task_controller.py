@@ -113,7 +113,9 @@ def register_routes(app):
         Returns:
             str: HTML con los detalles de la tarea
         """
-        pass # TODO: implementar el método
+        task = Task.query.get_or_404(task_id)
+        return render_template('task_detail.html', task=task)
+
     
     
     @app.route('/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
@@ -130,11 +132,31 @@ def register_routes(app):
         Returns:
             str: HTML del formulario o redirección tras editar
         """
+    
+        task = Task.query.get_or_404(task_id)
+
         if request.method == 'POST':
-            pass # TODO: implementar para una solicitud POST
-        
-        # Mostrar el formulario para editar la tarea
-        pass # TODO: implementar para una solicitud GET
+            title = request.form.get('title')
+            description = request.form.get('description')
+            due_date_str = request.form.get('due_date')
+            due_date = datetime.strptime(due_date_str, '%Y-%m-%d') if due_date_str else None
+
+            if not title:
+                flash('El título es obligatorio.', 'danger')
+                return redirect(url_for('task_edit', task_id=task_id))
+
+            task.title = title
+            task.description = description
+            task.due_date = due_date
+
+            db.session.commit()
+            flash('Tarea actualizada correctamente.', 'success')
+            return redirect(url_for('task_detail', task_id=task.id))
+
+        return render_template('task_form.html', action='Editar', task=task)
+
+     
+       
     
     
     @app.route('/tasks/<int:task_id>/delete', methods=['POST'])
@@ -148,8 +170,13 @@ def register_routes(app):
         Returns:
             Response: Redirección a la lista de tareas
         """
-        pass # TODO: implementar el método
-    
+   
+        task = Task.query.get_or_404(task_id)
+        db.session.delete(task)
+        db.session.commit()
+        flash('Tarea eliminada.', 'success')
+        return redirect(url_for('task_list'))
+       
     
     @app.route('/tasks/<int:task_id>/toggle', methods=['POST'])
     def task_toggle(task_id):
@@ -162,7 +189,13 @@ def register_routes(app):
         Returns:
             Response: Redirección a la lista de tareas
         """
-        pass # TODO: implementar el método
+ 
+        task = Task.query.get_or_404(task_id)
+        task.completed = not task.completed
+        db.session.commit()
+        flash('Estado de la tarea actualizado.', 'info')
+        return redirect(url_for('task_list'))
+
     
     
     # Rutas adicionales para versiones futuras
@@ -176,12 +209,25 @@ def register_routes(app):
         Returns:
             json: Lista de tareas en formato JSON
         """
-        # TODO: para versiones futuras
-        return jsonify({
-            'tasks': [],
-            'message': 'API en desarrollo - Implementar en versiones futuras'
+            
+        #'message': 'API en desarrollo - Implementar en versiones futuras'
+        tasks = Task.query.all() 
+        
+        return jsonify({ 
+           
+            'tasks': [
+                {
+                    'id': task.id,
+                    'title': task.title,
+                    'description': task.description,
+                    'due_date': task.due_date.isoformat() if task.due_date else None,
+                    'created_at': task.created_at.isoformat(),
+                    'completed': task.completed
+                }
+                for task in tasks
+            ]
         })
-    
+            
     
     @app.errorhandler(404)
     def not_found_error(error):
