@@ -44,27 +44,23 @@ def register_routes(app):
         """
      
         filter_type = request.args.get('filter', 'all')
-        sort_type = request.args.get('sort', 'created')
+        sort_by = request.args.get('sort', 'created')
 
-        query = Task.query
+        # Por ahora, solo mostrar una lista vacía
+        tasks = []
 
-        if filter_type == 'pending':
-            query = query.filter_by(completed=False)
-        elif filter_type == 'completed':
-            query = query.filter_by(completed=True)
+        # Datos para pasar a la plantilla
+        context = {
+            'tasks': tasks,
+            'filter_type': filter_type,
+            'sort_by': sort_by,
+            'total_tasks': len(tasks),
+            'pending_count': 0,
+            'completed_count': 0
+        }
 
-       
-        if sort_type == 'date':
-            query = query.order_by(Task.due_date.asc())
-        elif sort_type == 'title':
-            query = query.order_by(Task.title.asc())
-        else: 
-            query = query.order_by(Task.created_at.desc())
+        return render_template('task_list.html', **context) 
 
-        tasks = query.all()
-        return render_template('task_list.html', tasks=tasks)
-
-    
     
     @app.route('/tasks/new', methods=['GET', 'POST'])
     def task_create():

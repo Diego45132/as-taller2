@@ -10,7 +10,12 @@ import os
 
 # Crear instancia de SQLAlchemy
 db = SQLAlchemy()
-
+class Tarea(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(100), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+    estado = db.Column(db.String(20), default='pendiente')
+    fecha_vencimiento = db.Column(db.Date, nullable=False)
 
 def create_app(config_name=None):
     """
