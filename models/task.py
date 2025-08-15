@@ -5,7 +5,7 @@ Este archivo contiene la definición del modelo Task usando SQLAlchemy ORM.
 """
 
 from datetime import datetime
-from app import db
+from models import db
 
 
 class Task(db.Model):
@@ -16,16 +16,21 @@ class Task(db.Model):
     # Nombre de la tabla en la base de datos
     __tablename__ = 'tasks'
     
+    id = db.Column(db.Integer, primary_key=True)
+   
+    estado = db.Column(db.String(20), default='pendiente')
+    fecha_vencimiento = db.Column(db.Date, nullable=False)
+    
     # Definición de columnas
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    titulo = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     completed = db.Column(db.Boolean, default=False, nullable=False)
     due_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
-    def __init__(self, title, description=None, due_date=None):
+    def __init__(self, title, description=None, due_date=None, completed=False):
         """
         Constructor del modelo Task
         
@@ -37,7 +42,7 @@ class Task(db.Model):
         self.title = title
         self.description = description
         self.due_date = due_date
-        self.completed = False
+        self.completed = completed
     
     def __repr__(self):
         """Representación en string del objeto Task"""

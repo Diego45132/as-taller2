@@ -21,7 +21,7 @@
                     Gestiona y organiza tus tareas pendientes
                 </p>
             </div>
-            <a href="{{ url_for('task_create') }}" class="btn btn-primary">
+            <a href="{{ url_for('tasks.task_list') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>
                 Nueva Tarea
             </a>
@@ -225,7 +225,7 @@
                                 No hay tareas que coincidan con los filtros seleccionados.
                             {% endif %}
                         </p>
-                        <a href="{{ url_for('task_create') }}" class="btn btn-primary">
+                        <a href="{{ url_for('tasks.task_create') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>
                             Crear Primera Tarea
                         </a>

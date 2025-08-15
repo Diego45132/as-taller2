@@ -21,7 +21,7 @@
     <!-- Navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('task_list') }}">
+            <a class="navbar-brand" href="{{ url_for('tasks.task_list') }}">
                 <i class="fas fa-tasks me-2"></i>
                 To-Do App MVC
             </a>
@@ -33,13 +33,14 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('task_list') }}">
+                        <a class="nav-link" href="{{ url_for('tasks.task_list') }}">
                             <i class="fas fa-list me-1"></i>
                             Todas las Tareas
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('task_create') }}">
+                        <a class="nav-link" href="{{ url_for('tasks.task_create') }}">
+
                             <i class="fas fa-plus me-1"></i>
                             Nueva Tarea
                         </a>
@@ -81,7 +82,7 @@
             <ol class="breadcrumb">
                 {% block breadcrumb %}
                 <li class="breadcrumb-item">
-                    <a href="{{ url_for('task_list') }}">
+                    <a href="{{ url_for('tasks.task_list') }}">
                         <i class="fas fa-home me-1"></i>
                         Inicio
                     </a>

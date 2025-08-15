@@ -4,18 +4,12 @@ Este archivo configura y ejecuta la aplicación Flask siguiendo el patrón MVC
 """
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from models import db
 from config import config
 import os
-
+from controllers.task_controller import task_bp,register_routes
 # Crear instancia de SQLAlchemy
-db = SQLAlchemy()
-class Tarea(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    titulo = db.Column(db.String(100), nullable=False)
-    descripcion = db.Column(db.Text, nullable=False)
-    estado = db.Column(db.String(20), default='pendiente')
-    fecha_vencimiento = db.Column(db.Date, nullable=False)
+
 
 def create_app(config_name=None):
     """
@@ -35,7 +29,11 @@ def create_app(config_name=None):
     
     # Aplicar configuración
     app.config.from_object(config[config_name])
-    
+   
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tareas.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.secret_key = 'clave_secreta'
+
     # Inicializar extensiones
     db.init_app(app)
     
@@ -43,19 +41,33 @@ def create_app(config_name=None):
     from models.task import Task
     
     # Registrar blueprints (controladores)
-    from controllers.task_controller import register_routes
+    from controllers.task_controller import register_routes, task_bp
     register_routes(app)
+    print(app.url_map)
+
+    print("\n🔗 RUTAS REGISTRADAS:")
+    app.register_blueprint(task_bp, url_prefix='')
+    for rule in app.url_map.iter_rules():
+        print(f"{rule.endpoint}: {rule.rule} ({', '.join(rule.methods)})")
     
+    
+
     # Crear tablas de base de datos
     with app.app_context():
         db.create_all()
     
+
     return app
 
 
 if __name__ == '__main__':
     print("Iniciando aplicación To-Do MVC...")
     app = create_app()
+    for rule in app.url_map.iter_rules():
+     print(f"Endpoint: {rule.endpoint} → Ruta: {rule.rule} → Métodos: {rule.methods}")
+
+    app.run(debug=True)
+
     
     print("Accede a: http://127.0.0.1:5000")
     print("Modo debug activado - Los cambios se recargarán automáticamente")

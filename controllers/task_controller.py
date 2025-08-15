@@ -5,10 +5,13 @@ Este archivo contiene todas las rutas y lógica relacionada con las tareas.
 Representa la capa "Controlador" en la arquitectura MVC.
 """
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 from models.task import Task
-from app import db
+from models import db
+from flask import Blueprint
+
+task_bp = Blueprint('tasks', __name__)
 
 
 def register_routes(app):
@@ -19,7 +22,8 @@ def register_routes(app):
         app (Flask): Instancia de la aplicación Flask
     """
     
-    @app.route('/')
+
+    @task_bp.route('/')
     def index():
         """
         Ruta principal - Redirige a la lista de tareas
@@ -27,10 +31,11 @@ def register_routes(app):
         Returns:
             Response: Redirección a la lista de tareas
         """
-        return redirect(url_for('task_list'))
+       
+        return redirect(url_for('tasks.task_list'))
     
     
-    @app.route('/tasks')
+    @task_bp.route('/tasks')
     def task_list():
         """
         Muestra la lista de todas las tareas
@@ -62,7 +67,7 @@ def register_routes(app):
         return render_template('task_list.html', **context) 
 
     
-    @app.route('/tasks/new', methods=['GET', 'POST'])
+    @task_bp.route('/tasks/new', methods=['GET', 'POST'])
     def task_create():
         """
         Crea una nueva tarea
@@ -75,30 +80,29 @@ def register_routes(app):
         """
         
         if request.method == 'POST':
-            title = request.form.get('title')
+            titulo = request.form.get('titulo')
             description = request.form.get('description')
             due_date_str = request.form.get('due_date')
-            due_date = datetime.strptime(due_date_str, '%Y-%m-%d') if due_date_str else None
+            due_date = datetime.strptime(due_date_str, '%Y-%m-%dT%H:%M') if due_date_str else None
 
-            if not title:
+            if not titulo:
                 flash('El título es obligatorio.', 'danger')
-                return redirect(url_for('task_create'))
-
-            task = Task(
-                title=title,
+                return redirect(url_for('tasks.task_list'))
+            new_task = Task(
+                titulo=titulo,
                 description=description,
                 due_date=due_date,
                 completed=False
             )
 
-            db.session.add(task)
+            db.session.add(new_task)
             db.session.commit()
             flash('Tarea creada correctamente.', 'success')
-            return redirect(url_for('task_list'))
+            return redirect(url_for('tasks.task_list'))
 
         return render_template('task_form.html', action='Crear', task=None)
            
-    @app.route('/tasks/<int:task_id>')
+    @task_bp.route('/tasks/<int:task_id>')
     def task_detail(task_id):
         """
         Muestra los detalles de una tarea específica
@@ -113,8 +117,7 @@ def register_routes(app):
         return render_template('task_detail.html', task=task)
 
     
-    
-    @app.route('/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
+    @task_bp.route('/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
     def task_edit(task_id):
         """
         Edita una tarea existente
@@ -132,30 +135,28 @@ def register_routes(app):
         task = Task.query.get_or_404(task_id)
 
         if request.method == 'POST':
-            title = request.form.get('title')
+            titulo = request.form.get('titulo')
             description = request.form.get('description')
             due_date_str = request.form.get('due_date')
             due_date = datetime.strptime(due_date_str, '%Y-%m-%d') if due_date_str else None
 
-            if not title:
+            if not titulo:
                 flash('El título es obligatorio.', 'danger')
-                return redirect(url_for('task_edit', task_id=task_id))
-
-            task.title = title
+                return redirect(url_for('tasks.task_detail', task_id=task.id))
             task.description = description
             task.due_date = due_date
 
             db.session.commit()
             flash('Tarea actualizada correctamente.', 'success')
-            return redirect(url_for('task_detail', task_id=task.id))
-
+            return redirect(url_for('tasks.task_detail', task_id=task.id))
+        
         return render_template('task_form.html', action='Editar', task=task)
 
      
        
     
     
-    @app.route('/tasks/<int:task_id>/delete', methods=['POST'])
+    @task_bp.route('/tasks/<int:task_id>/delete', methods=['POST'])
     def task_delete(task_id):
         """
         Elimina una tarea
@@ -171,10 +172,9 @@ def register_routes(app):
         db.session.delete(task)
         db.session.commit()
         flash('Tarea eliminada.', 'success')
-        return redirect(url_for('task_list'))
-       
+        return redirect(url_for('tasks.task_list'))
     
-    @app.route('/tasks/<int:task_id>/toggle', methods=['POST'])
+    @task_bp.route('/tasks/<int:task_id>/toggle', methods=['POST'])
     def task_toggle(task_id):
         """
         Cambia el estado de completado de una tarea
@@ -190,13 +190,12 @@ def register_routes(app):
         task.completed = not task.completed
         db.session.commit()
         flash('Estado de la tarea actualizado.', 'info')
-        return redirect(url_for('task_list'))
-
+        return redirect(url_for('tasks.task_list'))
     
     
     # Rutas adicionales para versiones futuras
     
-    @app.route('/api/tasks', methods=['GET'])
+    @task_bp.route('/api/tasks', methods=['GET'])
     def api_tasks():
         """
         API endpoint para obtener tareas en formato JSON
@@ -214,7 +213,7 @@ def register_routes(app):
             'tasks': [
                 {
                     'id': task.id,
-                    'title': task.title,
+                    'titulo': task.titulo,
                     'description': task.description,
                     'due_date': task.due_date.isoformat() if task.due_date else None,
                     'created_at': task.created_at.isoformat(),
@@ -225,13 +224,13 @@ def register_routes(app):
         })
             
     
-    @app.errorhandler(404)
+    @task_bp.errorhandler(404)
     def not_found_error(error):
         """Maneja errores 404 - Página no encontrada"""
         return render_template('404.html'), 404
     
     
-    @app.errorhandler(500)
+    @task_bp.errorhandler(500)
     def internal_error(error):
         """Maneja errores 500 - Error interno del servidor"""
         db.session.rollback()

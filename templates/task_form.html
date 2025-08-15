@@ -8,7 +8,7 @@
 {% block breadcrumb %}
 {{ super() }}
 <li class="breadcrumb-item">
-    <a href="{{ url_for('task_list') }}">Tareas</a>
+    <a href="{{ url_for('tasks.task_list') }}">Tareas</a>
 </li>
 <li class="breadcrumb-item active">{{ page_title }}</li>
 {% endblock %}
@@ -33,7 +33,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="taskForm" novalidate>
+               <form method="POST" action="{{ url_for('tasks.task_create') }}">
                     <div class="mb-3">
                         <label for="title" class="form-label">
                             <i class="fas fa-heading me-1"></i>
@@ -115,7 +115,7 @@
                     {% endif %}
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('task_list') }}" class="btn btn-outline-secondary">
+                        <a href="{{ url_for('tasks.task_list') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i>
                             Cancelar
                         </a>
